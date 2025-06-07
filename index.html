@@ -1,1 +1,371 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Для самой Сони</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
+    body {
+      background-color: #faf3f0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #333;
+      font-family: 'Roboto', sans-serif;
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 600px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .time-wrapper {
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    .time {
+      font-size: clamp(2.5rem, 8vw, 4rem);
+      font-weight: 300;
+      font-family: 'Playfair Display', serif;
+      color: #d4a373;
+      letter-spacing: 2px;
+      position: relative;
+      display: inline-block;
+    }
+
+    .time::after {
+      content: '';
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #d4a373, transparent);
+    }
+
+    .message-container {
+      min-height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin-bottom: 1rem;
+    }
+
+    .message {
+      font-size: clamp(1rem, 4vw, 1.4rem);
+      line-height: 1.5;
+      font-weight: 300;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.8s ease;
+      position: absolute;
+      width: 100%;
+      padding: 0 0.5rem;
+      word-break: break-word;
+    }
+
+    .message.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .petal {
+      position: absolute;
+      background-size: contain;
+      background-repeat: no-repeat;
+      opacity: 0.6;
+      z-index: -1;
+      animation: float linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(0) rotate(0deg);
+      }
+      100% {
+        transform: translateY(-100vh) rotate(360deg);
+      }
+    }
+
+    .signature {
+      margin-top: 2rem;
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      color: #d4a373;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 1s ease 0.3s;
+      font-size: clamp(1rem, 4vw, 1.2rem);
+    }
+
+    .signature.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Анимация для мобильных устройств */
+    @media (max-width: 768px) {
+      .container {
+        padding: 1.5rem 1rem;
+      }
+      
+      .time::after {
+        width: 60px;
+        bottom: -10px;
+      }
+      
+      .message-container {
+        min-height: 120px;
+      }
+      
+      .petal {
+        animation-duration: 15s !important;
+      }
+    }
+
+    /* Портретная ориентация */
+    @media (orientation: portrait) and (max-height: 700px) {
+      .container {
+        padding-top: 1rem;
+      }
+      
+      .time-wrapper {
+        margin-bottom: 1.5rem;
+      }
+      
+      .message-container {
+        min-height: 100px;
+        margin-bottom: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="time-wrapper">
+    <div class="time" id="clock">--:--</div>
+  </div>
+  
+  <div class="message-container">
+    <div class="message active" id="message">Загрузка...</div>
+  </div>
+  
+  <div class="signature" id="signature">Твой</div>
+</div>
+
+<script>
+  const messages = [
+    {
+      text: "Сейчас %time%, любимая, и я снова думаю о твоих глазах, в которых так легко потеряться...",
+      petals: 3
+    },
+    {
+      text: "На часах %time%, дорогая, а в моём сердце всё тот же вопрос: как я заслужил тебя?",
+      petals: 5
+    },
+    {
+      text: "Уже %time%, солнышко, а я всё ещё под впечатлением от твоей улыбки",
+      petals: 2
+    },
+    {
+      text: "%time% — идеальное время, чтобы сказать, зайка, что ты делаешь этот мир прекраснее",
+      petals: 4
+    },
+    {
+      text: "Сейчас %time%, женщина (шутка), а я всё так же хочу слышать твой смех каждое утро",
+      petals: 3
+    },
+    {
+      text: "Время %time%, мать моих будущих детей (шучу), напоминает мне о самых ценных моментах с тобой",
+      petals: 5
+    },
+    {
+      text: "Уже %time%, котёнок, а я всё не могу привыкнуть к тому, как ты меняешь всё вокруг",
+      petals: 2
+    },
+    {
+      text: "%time%, принцесса, и я снова благодарен судьбе за наш путь",
+      petals: 4
+    },
+    {
+      text: "Сейчас %time%, мать твою, как же я тебя люблю, хоть ты и сводишь меня с ума",
+      petals: 3
+    },
+    {
+      text: "На часах %time%, пуся (прости), а в моей душе — бесконечное восхищение тобой",
+      petals: 5
+    },
+    {
+      text: "Сейчас %time%, конфетка, и я снова мечтаю о нашей следующей встрече",
+      petals: 3
+    },
+    {
+      text: "Уже %time%, золотце, а ты всё так же самая красивая девушка на свете",
+      petals: 4
+    },
+    {
+      text: "%time%, мой личный антидепрессант (без шуток), и я снова улыбаюсь, думая о тебе",
+      petals: 2
+    },
+    {
+      text: "На часах %time%, сердце моё, а в голове — только ты",
+      petals: 5
+    },
+    {
+      text: "Сейчас %time%, родная, и я снова понимаю, как мне повезло",
+      petals: 3
+    },
+    {
+      text: "На часах %time%, ё-маё, опять ты в моих мыслях, хоть и бесишь меня иногда",
+      petals: 4
+    },
+    {
+      text: "Уже %time%, блин, опять думаю о тебе, хотя ты этого не заслуживаешь",
+      petals: 2
+    },
+    {
+      text: "%time%, чёрт возьми, как же ты красива сегодня, хоть и ведёшь себя как сущий демон",
+      petals: 5
+    },
+    {
+      text: "Сейчас %time%, мать-перемать, ну как так можно быть одновременно и раздражающей и обворожительной?",
+      petals: 3
+    },
+    {
+      text: "На часах %time%, ёкарный бабай, ну почему я не могу перестать думать о тебе, хоть ты и настоящая бестия",
+      petals: 4
+    },
+    {
+      text: "Уже %time%, ну ты даёшь, опять заставила меня улыбаться, хотя прекрасно знаешь, что я злюсь на тебя",
+      petals: 2
+    },
+    {
+      text: "%time%, ну ё-моё, как же ты умудряешься быть такой невыносимой и такой желанной одновременно?",
+      petals: 5
+    },
+    {
+      text: "Сейчас %time%, мать твою за ногу, ну почему ты так идеальна, хоть и сводишь меня с ума",
+      petals: 3
+    },
+    {
+      text: "На часах %time%, ну ты блин даёшь, опять в моих мыслях, хотя ведёшь себя как настоящая стерва",
+      petals: 4
+    }
+  ];
+
+  const petalImages = [
+    'https://cdn.pixabay.com/photo/2017/01/10/03/06/rose-1968358_640.png',
+    'https://cdn.pixabay.com/photo/2017/01/31/23/42/decorative-2028039_640.png',
+    'https://cdn.pixabay.com/photo/2017/01/31/23/42/decorative-2028044_640.png'
+  ];
+
+  let currentMessageIndex = Math.floor(Math.random() * messages.length);
+  const messageElement = document.getElementById('message');
+  const signatureElement = document.getElementById('signature');
+  let changeInterval;
+
+  function updateClock() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const timeString = `${hours}:${minutes}`;
+    
+    document.getElementById('clock').textContent = timeString;
+    return timeString;
+  }
+
+  function changeMessage() {
+    const timeString = updateClock();
+    
+    messageElement.classList.remove('active');
+    
+    setTimeout(() => {
+      currentMessageIndex = (currentMessageIndex + 1) % messages.length;
+      const messageData = messages[currentMessageIndex];
+      
+      messageElement.textContent = messageData.text.replace('%time%', timeString);
+      messageElement.classList.add('active');
+      
+      createPetals(messageData.petals);
+    }, 500);
+    
+    // Случайный интервал между 5 и 60 секундами
+    const nextInterval = Math.floor(Math.random() * 55000) + 5000;
+    clearInterval(changeInterval);
+    changeInterval = setTimeout(changeMessage, nextInterval);
+  }
+
+  function createPetals(count) {
+    document.querySelectorAll('.petal').forEach(el => el.remove());
+    
+    for (let i = 0; i < count; i++) {
+      setTimeout(() => {
+        const petal = document.createElement('div');
+        petal.className = 'petal';
+        
+        const size = Math.random() * 20 + 15;
+        const posX = Math.random() * 100;
+        const duration = Math.random() * 15 + 10;
+        const delay = Math.random() * 5;
+        const image = petalImages[Math.floor(Math.random() * petalImages.length)];
+        
+        petal.style.width = `${size}px`;
+        petal.style.height = `${size}px`;
+        petal.style.left = `${posX}%`;
+        petal.style.backgroundImage = `url(${image})`;
+        petal.style.animationDuration = `${duration}s`;
+        petal.style.animationDelay = `${delay}s`;
+        
+        document.body.appendChild(petal);
+      }, i * 300);
+    }
+  }
+
+  // Инициализация
+  function init() {
+    updateClock();
+    changeMessage();
+    
+    // Показать подпись через 1.5 секунды
+    setTimeout(() => {
+      document.getElementById('signature').classList.add('show');
+    }, 1500);
+    
+    // Смена сообщения при обновлении страницы
+    window.addEventListener('beforeunload', function() {
+      currentMessageIndex = Math.floor(Math.random() * messages.length);
+    });
+  }
+
+  // Запуск при загрузке
+  window.addEventListener('DOMContentLoaded', init);
+  
+  // Адаптация к изменению размера экрана
+  window.addEventListener('resize', function() {
+    document.querySelectorAll('.petal').forEach(el => el.remove());
+    const currentPetals = messages[currentMessageIndex].petals;
+    createPetals(currentPetals);
+  });
+</script>
+
+</body>
+</html>
